@@ -1,0 +1,70 @@
+import cv2
+
+def char_generator(message):
+  for c in message:
+    yield ord(c)
+
+def get_image(image_location):
+  img = cv2.imread(image_location)
+  return img
+
+def gcd(x, y):
+  while(y):
+    x, y = y, x % y
+  return x
+
+def encode_image(image_location, message):
+  img = get_image(image_location)
+  msg_gen = char_generator(message)
+  pattern = gcd(len(img), len(img[0]))
+  for i in range(len(img)):
+    for j in range(len(img[0])):
+      if (i+1 * j+1) % pattern == 0:
+        try:
+          img[i-1][j-1][0] = next(msg_gen)
+        except StopIteration:
+          img[i-1][j-1][0] = 0
+          return img
+
+def decode_image(image_location):
+  img = get_image(image_location)
+  pattern = gcd(len(img), len(img[0]))
+  message = ''
+  for i in range(len(img)):
+    for j in range(len(img[0])):
+      if ((i-1) * (j-1)) % pattern == 0:
+        if img[i-1][j-1][0] != 0:
+          message = message + chr(img[i-1][j-1][0])
+        else:
+          return message
+
+print('Chao mung ban den voi chuong trinh giau tin vao anh')
+a = 1
+while(a!=0):
+  print('Neu muon Ma hoa anh (Encode) nhan phim 1')
+  print('Neu muon Giai ma anh (Decode) nhan phim 2')
+  try:
+    x = int(input('Nhap phim:'))
+    if x == 1:
+      diachianh = str(input('Nhap dia chi anh can ma hoa:'))
+      message = str(input('Nhap dong Ma muon luu:'))
+      img1 = encode_image(diachianh, message)
+      cv2.imshow('Display Image', img1)
+      cv2.waitKey(0)
+      img1_name = str(input("Mời bạn nhập tên file ảnh muốn lưu:")) 
+      print('Bạn đã mã hóa thành công với tên' + img1_name)
+      cv2.imwrite(img1_name, img1)
+    elif x == 2:
+      diachianh = str(input('Nhap dia chi anh can giai ma:'))
+      message = decode_image(diachianh)
+      print('Mat ma la:', message)
+    if x!=1 and x!=2:
+      raise Exception
+  except:
+    print('Nhap sai cu phap')
+  try:
+    a=int(input('Nhan 0 neu muon thoat chuong trinh:'))
+    if a!=0:
+      raise Exception
+  except:
+    a=1
